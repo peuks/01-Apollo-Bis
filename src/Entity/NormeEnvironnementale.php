@@ -22,6 +22,12 @@ class NormeEnvironnementale
      */
     private $nom;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Note::class, inversedBy="norme")
+     * @ORM\JoinColumn(nullable=true)
+     */
+    private $note;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -35,6 +41,18 @@ class NormeEnvironnementale
     public function setNom(?string $nom): self
     {
         $this->nom = $nom;
+
+        return $this;
+    }
+
+    public function getNote(): ?Note
+    {
+        return $this->note;
+    }
+
+    public function setNote(?Note $note): self
+    {
+        $this->note = $note;
 
         return $this;
     }

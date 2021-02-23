@@ -14,6 +14,9 @@ use Symfony\Component\Security\Core\User\UserInterface;
  */
 class User implements UserInterface
 {
+    public function __construct()
+    {
+    }
     /**
      * @ORM\Id
      * @ORM\GeneratedValue
@@ -46,6 +49,31 @@ class User implements UserInterface
      * @ORM\Column(type="boolean")
      */
     private $isVerified = false;
+
+    /**
+     * @ORM\OneToOne(targetEntity=Dossier::class, mappedBy="user", cascade={"persist", "remove"})
+     */
+    private $dossier;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $firstName;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $lastName;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $locataire;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $proprietaire;
 
     public function getId(): ?int
     {
@@ -143,6 +171,71 @@ class User implements UserInterface
     public function setIsVerified(bool $isVerified): self
     {
         $this->isVerified = $isVerified;
+
+        return $this;
+    }
+
+    public function getDossier(): ?Dossier
+    {
+        return $this->dossier;
+    }
+
+    public function setDossier(Dossier $dossier): self
+    {
+        // set the owning side of the relation if necessary
+        if ($dossier->getUser() !== $this) {
+            $dossier->setUser($this);
+        }
+
+        $this->dossier = $dossier;
+
+        return $this;
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->firstName;
+    }
+
+    public function setFirstName(string $firstName): self
+    {
+        $this->firstName = $firstName;
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->lastName;
+    }
+
+    public function setLastName(string $lastName): self
+    {
+        $this->lastName = $lastName;
+
+        return $this;
+    }
+
+    public function getLocataire(): ?bool
+    {
+        return $this->locataire;
+    }
+
+    public function setLocataire(bool $locataire): self
+    {
+        $this->locataire = $locataire;
+
+        return $this;
+    }
+
+    public function getProprietaire(): ?bool
+    {
+        return $this->proprietaire;
+    }
+
+    public function setProprietaire(bool $proprietaire): self
+    {
+        $this->proprietaire = $proprietaire;
 
         return $this;
     }

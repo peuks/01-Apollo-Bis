@@ -20,21 +20,21 @@ class Agrement
     /**
      * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $nom;
+    private $name;
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getNom(): ?string
+    public function getLabel(): ?string
     {
-        return $this->nom;
+        return $this->label;
     }
 
-    public function setNom(?string $nom): self
+    public function setLabel(?string $label): self
     {
-        $this->nom = $nom;
+        $this->label = $label;
 
         return $this;
     }

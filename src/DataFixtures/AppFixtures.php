@@ -4,12 +4,17 @@ namespace App\DataFixtures;
 
 use App\Entity\Agrement;
 use App\Entity\Bien;
+use App\Entity\NatureLocation;
 use App\Entity\NormeEnvironnementale;
 use App\Entity\Note;
 use App\Entity\PeriodeConstruction;
 use App\Entity\TypeConstruction;
+use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Faker\Factory;
+use phpDocumentor\Reflection\Types\This;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
  * TODO : Créer un bien
@@ -21,90 +26,185 @@ use Doctrine\Persistence\ObjectManager;
  */
 class AppFixtures extends Fixture
 {
+    protected $faker, $encoder;
+
+    public function __construct(UserPasswordEncoderInterface $encoder)
+    {
+        // $this->faker = new Factory::create("fr_FR");
+        $this->faker = Factory::create("fr_FR");
+        $this->encoder = $encoder;
+    }
+
+
     public function load(ObjectManager $manager)
     {
         /**
-         * ?Création des biens
+         * Création des Agréments
          */
-        $biens = [];
-        // *Création du bien 
-        $bien = new Bien;
-        $bien->setLoyer(650)
-            ->setVille("Strasbourg");
+        $agrements = [];
+        $agrementList = ["Balcon", "Terasse", "Ascenseur", "Grenier"];
+        foreach ($agrementList as $i) {
+            $agrement = new Agrement;
+            $agrement->setLabel($i);
 
-        // Stocker le bien dans une liste
-        $biens[] = $bien;
+            $manager->persist($agrement);
+            $agrements[] = $agrement;
+        }
+        /**
+         * Création des Normes Environnementales
+         * DPE et GES
+         */
+        $normeEnviDPE = new NormeEnvironnementale;
+        $normeEnviDPE->setNom("DPE");
 
-        // Persister le bien
-        $manager->persist($bien);
+        $manager->persist($normeEnviDPE);
+
+        $normeEnviGSE = new NormeEnvironnementale;
+        $normeEnviGSE->setNom("GSE");
+
+        $manager->persist($normeEnviGSE);
 
         /**
-         * ?Création Période de Construction
+         * Création des notes pour les normes Environnementales DPE et GES
+         * Les notes allant de A jusqu'à E
          */
-
-        $perdiodeConstructions = [];
-        $periodeConstruction = new PeriodeConstruction;
-        $periodeConstruction->setPeriode("Avant 2005");
-
-        //Stocker la période dans une liste
-        $perdiodeConstructions[] = $periodeConstruction;
-        // Persister la période
-        $manager->persist($periodeConstruction);
-
-        /**
-         * ?Création du type de construction  
-         * Appartement,Maison,Studio...
-         */
-        $typeConstructions = [];
-
-        $typeConstruction = new TypeConstruction;
-        $typeConstruction->setNom("Appartement");
-
-        // Sauvegarder le type dans une liste
-        $typeConstructions[] = $typeConstruction;
-
-        // Persister le type de construction
-        $manager->persist($typeConstruction);
-
-        /**
-         * ?Création du type de Norme Environnementale
-         * DPE...
-         */
-        $normeEnvironnementale = new NormeEnvironnementale;
-        $normeEnvironnementale->setNom("DPE");
-
-        /**
-         * ? Création des notes allant de A jusqu'à G pour les normenes environnementales
-         */
+        $notesListe = ["A", "B", "C", "D", "E", "E", "G"];
         $notes = [];
-        $grades = ["A", "B", "C", "D", "E", "F", "G"];
 
-        foreach ($grades as $i) {
+        foreach ($notesListe as $i) {
             $note = new Note;
             $note->setGrade($i);
 
-            // Sauvegarder la note dans une liste
             $notes[] = $note;
 
-            // Persister la note
             $manager->persist($note);
         }
+
+
         /**
-         * ? Création des agréments
-         * Terasse, Cave, Grenier...
+         * Création des types de bien ( maison , appartement...)
          */
-        $agrements = [];
-        $agrementsType = ["Ascenseur", "Grenier", "Cave"];
-        foreach ($agrementsType as $i) {
-            $agrement = new Agrement;
-            $agrement->setNom($i);
+        $typesBienListe = ["Appartement", "Maison", "Résidence Etudiante", "Studio"];
+        $typeConstructions = [];
 
-            // Sauvegarder l'agrément une liste
-            $agrements[] = $agrement;
+        foreach ($typesBienListe as $i) {
+            $construction = new TypeConstruction;
+            $construction->setNom($i);
 
-            // Persiter l'agrément
-            $manager->persist($agrement);
+            // Sauvegarder le type dans une liste
+            $typeConstructions[] = $construction;
+
+            $manager->persist($construction);
         }
+
+        /**
+         * Création Période de Construction
+         * Il y en a 4
+         */
+        $perdioDeConstructionListe = [
+            'Avant 1945',
+            "Entre 1945 et 1974",
+            "Entre 1975 et 1989",
+            "Entre 1989 et 2005",
+            "Après 2005"
+        ];
+        $perdiodeConstruction = [];
+        foreach ($perdioDeConstructionListe as $i) {
+            $periode = new PeriodeConstruction;
+            $periode->setPeriode($i);
+
+            $perdiodeConstruction[] = $periode;
+            $manager->persist($periode);
+        }
+
+        /**
+         * Nature de la location
+         */
+        $typeLocationListe = [
+            "Colocation",
+            "Co-Living",
+            "Meublé",
+            "Non Meublé"
+        ];
+
+        $locations = [];
+
+        foreach ($typeLocationListe as $i) {
+            $natureLocation = new NatureLocation;
+            $natureLocation->setType($i);
+
+            $locations[] = $natureLocation;
+        }
+
+        /**
+         * Création de l'Admin
+         */
+        $admin = new User();
+        $admin->setEmail("admin@admin.com")
+            ->setFirstName("AdminFirstName")
+            ->setLastName("AdminLastName")
+            ->setRoles(['ROLE_ADMIN'])
+            ->setPassword($this->encoder->encodePassword($admin, 'password'));
+        // Persist Admin
+        $manager->persist($admin);
+
+        /**
+         * @var Collection|User[]
+         * @psalm-var Collection<int, User>
+         * Liste des utilisateurs locataires
+         */
+        $locataires = [];
+
+        /**
+         * Création des locataires
+         * 
+         */
+
+        for ($i = 0; $i < 10; $i++) {
+            $user = new User;
+            $user->setEmail("locataire$i@gmail.com")
+                ->setFirstName($this->faker->firstName)
+                ->setLastName($this->faker->lastName)
+                // ->setUsername($this->faker->)
+                ->setPassword($this->encoder->encodePassword($user, 'password'))
+                ->setLocataire(true)
+                ->setProprietaire(false);
+            $locataires[] = $user;
+            $manager->persist($user);
+        }
+
+
+        /**
+         * @var Collection|User[]
+         * @psalm-var Collection<int, User>
+         * Liste des utilisateurs propriétaires
+         */
+        $proprietaires = [];
+
+        /**
+         * Création des propriétaires
+         */
+
+        for ($i = 0; $i < 10; $i++) {
+            $user = new User;
+            $user->setEmail("proprietaire$i@gmail.com")
+                ->setFirstName($this->faker->firstName)
+                ->setLastName($this->faker->lastName)
+                ->setPassword($this->encoder->encodePassword($user, 'password'))
+                ->setLocataire(false)
+                ->setProprietaire(true);
+            $users[] = $user;
+            $manager->persist($user);
+        }
+
+
+        /**
+         * Configuration des utilisateurs et des biens
+         */
+        // foreach ($users as $user) {
+
+        //     $user->
+        // }
         $manager->flush();
     }
 }

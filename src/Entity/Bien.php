@@ -132,6 +132,11 @@ class Bien
      */
     private $afficherTelephone;
 
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $loyerReference;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -409,6 +414,18 @@ class Bien
     public function setAfficherTelephone(?bool $afficherTelephone): self
     {
         $this->afficherTelephone = $afficherTelephone;
+
+        return $this;
+    }
+
+    public function getLoyerReference(): ?bool
+    {
+        return $this->loyerReference;
+    }
+
+    public function setLoyerReference(bool $loyerReference): self
+    {
+        $this->loyerReference = $loyerReference;
 
         return $this;
     }
