@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -16,6 +18,7 @@ class User implements UserInterface
 {
     public function __construct()
     {
+        $this->biens = new ArrayCollection();
     }
     /**
      * @ORM\Id
@@ -74,6 +77,11 @@ class User implements UserInterface
      * @ORM\Column(type="boolean")
      */
     private $proprietaire;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Bien::class, mappedBy="user")
+     */
+    private $biens;
 
     public function getId(): ?int
     {
@@ -236,6 +244,36 @@ class User implements UserInterface
     public function setProprietaire(bool $proprietaire): self
     {
         $this->proprietaire = $proprietaire;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Bien[]
+     */
+    public function getBiens(): Collection
+    {
+        return $this->biens;
+    }
+
+    public function addBien(Bien $bien): self
+    {
+        if (!$this->biens->contains($bien)) {
+            $this->biens[] = $bien;
+            $bien->setUser($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBien(Bien $bien): self
+    {
+        if ($this->biens->removeElement($bien)) {
+            // set the owning side to null (unless already changed)
+            if ($bien->getUser() === $this) {
+                $bien->setUser(null);
+            }
+        }
 
         return $this;
     }

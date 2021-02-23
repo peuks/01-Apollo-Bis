@@ -14,6 +14,7 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 use phpDocumentor\Reflection\Types\This;
+use Symfony\Component\BrowserKit\History;
 use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 /**
@@ -50,41 +51,15 @@ class AppFixtures extends Fixture
             $manager->persist($agrement);
             $agrements[] = $agrement;
         }
-        /**
-         * Création des Normes Environnementales
-         * DPE et GES
-         */
-        $normeEnviDPE = new NormeEnvironnementale;
-        $normeEnviDPE->setNom("DPE");
-
-        $manager->persist($normeEnviDPE);
-
-        $normeEnviGSE = new NormeEnvironnementale;
-        $normeEnviGSE->setNom("GSE");
-
-        $manager->persist($normeEnviGSE);
-
-        /**
-         * Création des notes pour les normes Environnementales DPE et GES
-         * Les notes allant de A jusqu'à E
-         */
-        $notesListe = ["A", "B", "C", "D", "E", "E", "G"];
-        $notes = [];
-
-        foreach ($notesListe as $i) {
-            $note = new Note;
-            $note->setGrade($i);
-
-            $notes[] = $note;
-
-            $manager->persist($note);
-        }
-
 
         /**
          * Création des types de bien ( maison , appartement...)
          */
-        $typesBienListe = ["Appartement", "Maison", "Résidence Etudiante", "Studio"];
+        $typesBienListe = ["Appartement", "Villa", "Maison", "Résidence Etudiante", "Studio"];
+
+        /**
+         * @var Collection|TypeConstruction[]
+         */
         $typeConstructions = [];
 
         foreach ($typesBienListe as $i) {
@@ -108,7 +83,9 @@ class AppFixtures extends Fixture
             "Entre 1989 et 2005",
             "Après 2005"
         ];
+
         $perdiodeConstruction = [];
+
         foreach ($perdioDeConstructionListe as $i) {
             $periode = new PeriodeConstruction;
             $periode->setPeriode($i);
@@ -116,6 +93,10 @@ class AppFixtures extends Fixture
             $perdiodeConstruction[] = $periode;
             $manager->persist($periode);
         }
+        /**
+         * Les notes environnementales
+         */
+        $notes = ["A", "B", "C", "D", "E", "F", "G"];
 
         /**
          * Nature de la location
@@ -134,6 +115,8 @@ class AppFixtures extends Fixture
             $natureLocation->setType($i);
 
             $locations[] = $natureLocation;
+
+            $manager->persist($natureLocation);
         }
 
         /**
@@ -144,7 +127,9 @@ class AppFixtures extends Fixture
             ->setFirstName("AdminFirstName")
             ->setLastName("AdminLastName")
             ->setRoles(['ROLE_ADMIN'])
-            ->setPassword($this->encoder->encodePassword($admin, 'password'));
+            ->setPassword($this->encoder->encodePassword($admin, 'password'))
+            ->setLocataire(false)
+            ->setProprietaire(false);
         // Persist Admin
         $manager->persist($admin);
 
@@ -182,7 +167,7 @@ class AppFixtures extends Fixture
         $proprietaires = [];
 
         /**
-         * Création des propriétaires
+         * Création des utilisateurs propriétaires
          */
 
         for ($i = 0; $i < 10; $i++) {
@@ -197,14 +182,30 @@ class AppFixtures extends Fixture
             $manager->persist($user);
         }
 
-
         /**
-         * Configuration des utilisateurs et des biens
+         * Association des biens aux propriétaires
          */
-        // foreach ($users as $user) {
 
-        //     $user->
-        // }
+        foreach ($proprietaires as $proprietaire) {
+            $bien = new Bien;
+            // Assoficer le bien au propriétaire
+            $bien->setUser($proprietaire);
+            $bien
+                ->setType($this->faker->randomElement($typeConstructions))
+                ->setSuperficie(mt_rand(20, 250))
+                ->setPiece(mt_rand(1, 5))
+                ->setChambre(mt_rand(1, $bien->getChambre() - 1))
+                ->setLoyerReference(mt_rand(400, 850))
+                ->setLoyer(mt_rand(250, 2500))
+                ->setCharge(50, 250)
+                ->setDpe($this->faker->randomElement($notes))
+                ->setGse($this->faker->randomElement($notes))
+                ->setDateDisponibilite($this->faker->dateTimeThisYear());
+            // Définir l'étage lorsqu'il ne s'agit pas d'une maison
+            ($bien->getType() === "Maison" || "Villa") ?: $bien->setEtage(mt_rand(0, 10));
+            $manager->persist($bien);
+        }
+
         $manager->flush();
     }
 }

@@ -132,10 +132,33 @@ class Bien
      */
     private $afficherTelephone;
 
+
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="string", length=100)
      */
     private $loyerReference;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=TypeConstruction::class, inversedBy="bien")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $type;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="biens")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
+
+    /**
+     * @ORM\Column(type="string", length=1)
+     */
+    private $dpe;
+
+    /**
+     * @ORM\Column(type="string", length=1)
+     */
+    private $gse;
 
     public function getId(): ?int
     {
@@ -418,14 +441,63 @@ class Bien
         return $this;
     }
 
-    public function getLoyerReference(): ?bool
+
+    public function getLoyerReference(): ?string
     {
         return $this->loyerReference;
     }
 
-    public function setLoyerReference(bool $loyerReference): self
+    public function setLoyerReference(string $loyerReference): self
     {
         $this->loyerReference = $loyerReference;
+
+        return $this;
+    }
+
+    public function getType(): ?TypeConstruction
+    {
+        return $this->type;
+    }
+
+    public function setType(?TypeConstruction $type): self
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    public function getDpe(): ?string
+    {
+        return $this->dpe;
+    }
+
+    public function setDpe(string $dpe): self
+    {
+        $this->dpe = $dpe;
+
+        return $this;
+    }
+
+    public function getGse(): ?string
+    {
+        return $this->gse;
+    }
+
+    public function setGse(string $gse): self
+    {
+        $this->gse = $gse;
 
         return $this;
     }
