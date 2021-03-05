@@ -160,6 +160,11 @@ class Bien
      */
     private $gse;
 
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $loyerPrecedent;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -498,6 +503,18 @@ class Bien
     public function setGse(string $gse): self
     {
         $this->gse = $gse;
+
+        return $this;
+    }
+
+    public function getLoyerPrecedent(): ?int
+    {
+        return $this->loyerPrecedent;
+    }
+
+    public function setLoyerPrecedent(int $loyerPrecedent): self
+    {
+        $this->loyerPrecedent = $loyerPrecedent;
 
         return $this;
     }

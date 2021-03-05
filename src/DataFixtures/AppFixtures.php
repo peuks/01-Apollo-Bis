@@ -22,8 +22,9 @@ use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
  * TODO : Créer une Période de construction
  * TODO : Créer un type de construction
  * TODO : Créer une Norme_Environnementale
- * TODO : Créer une Note
- * TODO : Créer un agrement
+ * TODO : Créer une Note ( cf VIRGILE )
+ * TODO : Créer un agrement de maison, d'immeuble et autres ( parking, cave, grenier , jardin, box)
+ * TODO : Proposer une durée si le contrat est de type MOBILITÉ (1 à 10 mois )
  */
 class AppFixtures extends Fixture
 {
@@ -178,32 +179,55 @@ class AppFixtures extends Fixture
                 ->setPassword($this->encoder->encodePassword($user, 'password'))
                 ->setLocataire(false)
                 ->setProprietaire(true);
-            $users[] = $user;
+            $proprietaires[] = $user;
             $manager->persist($user);
         }
 
         /**
-         * Association des biens aux propriétaires
+         * Initialisation des propriétaires avec au mieux 
          */
-
         foreach ($proprietaires as $proprietaire) {
-            $bien = new Bien;
-            // Assoficer le bien au propriétaire
-            $bien->setUser($proprietaire);
-            $bien
-                ->setType($this->faker->randomElement($typeConstructions))
-                ->setSuperficie(mt_rand(20, 250))
-                ->setPiece(mt_rand(1, 5))
-                ->setChambre(mt_rand(1, $bien->getChambre() - 1))
-                ->setLoyerReference(mt_rand(400, 850))
-                ->setLoyer(mt_rand(250, 2500))
-                ->setCharge(50, 250)
-                ->setDpe($this->faker->randomElement($notes))
-                ->setGse($this->faker->randomElement($notes))
-                ->setDateDisponibilite($this->faker->dateTimeThisYear());
-            // Définir l'étage lorsqu'il ne s'agit pas d'une maison
-            ($bien->getType() === "Maison" || "Villa") ?: $bien->setEtage(mt_rand(0, 10));
-            $manager->persist($bien);
+
+            /**
+             * Création et association des biens au propriétaire actuel.
+             */
+            for ($i = 0; $i < mt_rand(1, 2); $i++) {
+                $bien = new Bien;
+                // Assoficer le bien au propriétaire
+                $bien->setUser($proprietaire);
+                $bien
+                    ->setType($this->faker->randomElement($typeConstructions))
+                    ->setSuperficie(mt_rand(8, 400))
+                    ->setPiece(mt_rand(1, 5))
+                    ->setChambre(mt_rand(1, 4))
+                    ->setLoyerReference(mt_rand(400, 850))
+                    ->setLoyer(mt_rand(250, 2500))
+                    ->setCharge(50, 250)
+                    ->setDpe($this->faker->randomElement($notes))
+                    ->setGse($this->faker->randomElement($notes))
+                    ->setDateDisponibilite($this->faker->dateTimeThisYear())
+                    // Définir aléatoirement le fait que la location soit disponible en ligne ou non
+                    ->setLocationLigne([true, false][mt_rand(0, 1)])
+                    ->setCaution(mt_rand(100, 500))
+                    ->setMonopropriete([true, false][mt_rand(0, 1)])
+                    ->setEauIndiv(([true, false][mt_rand(0, 1)]))
+                    ->setFibre([true, false][mt_rand(0, 1)])
+                    ->setTnt([true, false][mt_rand(0, 1)])
+                    ->setCable([true, false][mt_rand(0, 1)])
+                    ->setChauffageInd([true, false][mt_rand(0, 1)])
+                    ->setNumeroLot(mt_rand(1, 50))
+                    ->setIrl(mt_rand(100, 600))
+                    ->setLoyerPrecedent(mt_rand(100, 600))
+                    ->setProvisionCharge(mt_rand(100, 600))
+                    ->setAdresse($this->faker->streetAddress)
+                    ->setCodePostal($this->faker->postcode)
+                    ->setVille($this->faker->postcode)
+                    ->setDescription($this->faker->sentence(10))
+                    ->setAfficherTelephone([true, false][mt_rand(0, 1)]);
+                // Définir l'étage lorsqu'il ne s'agit pas d'une maison
+                ($bien->getType() == "Maison") || ($bien->getType() == "Villa") ?: $bien->setEtage(mt_rand(1, 10));
+                $manager->persist($bien);
+            }
         }
 
         $manager->flush();

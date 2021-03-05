@@ -26,3 +26,19 @@ https://www.linkedin.com/in/maverick-lafont/
 
 125 € / 
 
+
+
+# Les Requêtes à fournir
+
+Sur la page d'acceuil , fournir le total des biens enrengistrés + 
+et du nombre de locataire
+
+Dashboard Propriétaire / Propriétés
+    Afficher les biens ( statut ( visible ou non ), nombre de candidature,Contrat le contrat en cours, Le bien est loué ?   )
+
+Dashboard Propriétaire / Propriété ( id )
+    Loyer, meuble ou non,nombre chambre,superficie,adresse, 
+    Afficher les biens ( statut ( visible ou non ), nombre de candidature,Contrat le contrat en cours, Le bien est loué ?   )
+    Lister les candidatures( photo,Nom, prenom, ressources financières,profession,note du locataire)
+    URL du dossier
+
