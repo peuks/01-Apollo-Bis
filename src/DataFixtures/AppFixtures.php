@@ -4,6 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Agrement;
 use App\Entity\Bien;
+use App\Entity\Dossier;
 use App\Entity\NatureLocation;
 use App\Entity\NormeEnvironnementale;
 use App\Entity\Note;
@@ -109,6 +110,16 @@ class AppFixtures extends Fixture
             "Non Meublé"
         ];
 
+        /**
+         * Statut de l'utilisateur
+         */
+        $typeStatut = [
+            "Etudiant",
+            "Salarie",
+            "Cadre",
+            "Chômeur"
+        ];
+
         $locations = [];
 
         foreach ($typeLocationListe as $i) {
@@ -123,6 +134,11 @@ class AppFixtures extends Fixture
         /**
          * Création de l'Admin
          */
+        echo '   
+             /******************************************
+             * Création de l\'administrateur           *
+             *******************************************/            
+            ';
         $admin = new User();
         $admin->setEmail("admin@admin.com")
             ->setFirstName("AdminFirstName")
@@ -133,6 +149,12 @@ class AppFixtures extends Fixture
             ->setProprietaire(false);
         // Persist Admin
         $manager->persist($admin);
+
+        echo '   
+            /**
+             * L\'Administrateur a bien été crée
+             */
+            ';
 
         /**
          * @var Collection|User[]
@@ -145,18 +167,23 @@ class AppFixtures extends Fixture
          * Création des locataires
          * 
          */
-
+        echo '   
+             /******************************************
+             * Création des locataires                 *
+             *******************************************/            
+            ';
         for ($i = 0; $i < 10; $i++) {
-            $user = new User;
-            $user->setEmail("locataire$i@gmail.com")
+            $locataire = new User;
+            $locataire->setEmail("locataire$i@gmail.com")
                 ->setFirstName($this->faker->firstName)
                 ->setLastName($this->faker->lastName)
                 // ->setUsername($this->faker->)
-                ->setPassword($this->encoder->encodePassword($user, 'password'))
+                ->setPassword($this->encoder->encodePassword($locataire, 'password'))
                 ->setLocataire(true)
                 ->setProprietaire(false);
-            $locataires[] = $user;
-            $manager->persist($user);
+            $locataires[] = $locataire;
+            $manager->persist($locataire);
+            echo "\nLe locataire " . $locataire->getEmail() . " a été crée \n";
         }
 
 
@@ -170,28 +197,39 @@ class AppFixtures extends Fixture
         /**
          * Création des utilisateurs propriétaires
          */
+        echo '   
+             /******************************************
+             * Création des propriétaires              *
+             *******************************************/            
+            ';
 
         for ($i = 0; $i < 10; $i++) {
-            $user = new User;
-            $user->setEmail("proprietaire$i@gmail.com")
+            $proprietaire = new User;
+            $proprietaire->setEmail("proprietaire$i@gmail.com")
                 ->setFirstName($this->faker->firstName)
                 ->setLastName($this->faker->lastName)
-                ->setPassword($this->encoder->encodePassword($user, 'password'))
+                ->setPassword($this->encoder->encodePassword($proprietaire, 'password'))
                 ->setLocataire(false)
                 ->setProprietaire(true);
-            $proprietaires[] = $user;
-            $manager->persist($user);
+            $proprietaires[] = $proprietaire;
+            $manager->persist($proprietaire);
+            echo "\nLe propriétaire " . $proprietaire->getEmail() . " a été crée \n";
         }
 
         /**
-         * Initialisation des propriétaires avec au mieux 
+         * Initialisation des propriétaires avec au mieux 2 biens
          */
+        echo '   
+             /******************************************
+             * Création des biens du propriétaire      *
+             *******************************************/            
+            ';
         foreach ($proprietaires as $proprietaire) {
 
             /**
              * Création et association des biens au propriétaire actuel.
              */
-            for ($i = 0; $i < mt_rand(1, 2); $i++) {
+            for ($i = 0; $i < mt_rand(0, 2); $i++) {
                 $bien = new Bien;
                 // Assoficer le bien au propriétaire
                 $bien->setUser($proprietaire);
@@ -227,9 +265,40 @@ class AppFixtures extends Fixture
                 // Définir l'étage lorsqu'il ne s'agit pas d'une maison
                 ($bien->getType() == "Maison") || ($bien->getType() == "Villa") ?: $bien->setEtage(mt_rand(1, 10));
                 $manager->persist($bien);
+
+                /**
+                 * Dire si un propriétaire à un bien ou non et combien 
+                 * lister tous les éléments du bien.
+                 */
+            }
+            echo $proprietaire->getBiens();
+            if ($proprietaire->getBiens() == null) {
+                echo "Le propriétaire n'a aucun bien !";
+                echo "Le bien est de type " . $bien->getType() . " avec un loyer de " . $bien->getLoyer() . "€ \n";
             }
         }
+        /**
+         * Initialisation des propriétaires avec au mieux 2 biens
+         */
+        foreach ($locataires as $locataire) {
 
+            /**
+             * Création et association du dossier
+             */
+            $dossier = new Dossier;
+            $dossier
+                ->setUser($locataire)
+                ->setDescription("Petite description de l'utilisateur")
+                ->setPrenom($locataire->getLastName())
+                ->setPhoto("http://fakeimg.pl/128x128?font=lobster")
+                ->setStatut("Chômeur");
+            $manager->persist($dossier);
+            $manager->persist($locataire);
+
+            echo "Initialisation des locataires \n";
+            echo "Le locataire à un dossier \n";
+            echo "Son statut est  \n" . $locataire->getDossier()->getStatut();
+        }
         $manager->flush();
     }
 }

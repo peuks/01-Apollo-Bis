@@ -144,11 +144,6 @@ class Bien
      */
     private $type;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="biens")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $user;
 
     /**
      * @ORM\Column(type="string", length=1)
@@ -164,6 +159,12 @@ class Bien
      * @ORM\Column(type="integer")
      */
     private $loyerPrecedent;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="biens")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $user;
 
     public function getId(): ?int
     {
@@ -471,18 +472,6 @@ class Bien
         return $this;
     }
 
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): self
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
     public function getDpe(): ?string
     {
         return $this->dpe;
@@ -515,6 +504,18 @@ class Bien
     public function setLoyerPrecedent(int $loyerPrecedent): self
     {
         $this->loyerPrecedent = $loyerPrecedent;
+
+        return $this;
+    }
+
+    public function getUser(): ?User
+    {
+        return $this->user;
+    }
+
+    public function setUser(?User $user): self
+    {
+        $this->user = $user;
 
         return $this;
     }

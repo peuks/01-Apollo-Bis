@@ -53,10 +53,6 @@ class User implements UserInterface
      */
     private $isVerified = false;
 
-    /**
-     * @ORM\OneToOne(targetEntity=Dossier::class, mappedBy="user", cascade={"persist", "remove"})
-     */
-    private $dossier;
 
     /**
      * @ORM\Column(type="string", length=255)
@@ -79,7 +75,12 @@ class User implements UserInterface
     private $proprietaire;
 
     /**
-     * @ORM\OneToMany(targetEntity=Bien::class, mappedBy="user")
+     * @ORM\OneToOne(targetEntity=Dossier::class, inversedBy="user", cascade={"persist", "remove"})
+     */
+    private $dossier;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Bien::class, mappedBy="user", orphanRemoval=true)
      */
     private $biens;
 
@@ -183,22 +184,7 @@ class User implements UserInterface
         return $this;
     }
 
-    public function getDossier(): ?Dossier
-    {
-        return $this->dossier;
-    }
 
-    public function setDossier(Dossier $dossier): self
-    {
-        // set the owning side of the relation if necessary
-        if ($dossier->getUser() !== $this) {
-            $dossier->setUser($this);
-        }
-
-        $this->dossier = $dossier;
-
-        return $this;
-    }
 
     public function getFirstName(): ?string
     {
@@ -244,6 +230,18 @@ class User implements UserInterface
     public function setProprietaire(bool $proprietaire): self
     {
         $this->proprietaire = $proprietaire;
+
+        return $this;
+    }
+
+    public function getDossier(): ?Dossier
+    {
+        return $this->dossier;
+    }
+
+    public function setDossier(?Dossier $dossier): self
+    {
+        $this->dossier = $dossier;
 
         return $this;
     }
